@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel — Visitor Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- QR code generated inline via canvas, no CDN needed -->
+<style>
+  :root {
+    --bg: #080d12;
+    --bg2: #0d1520;
+    --bg3: #121c2a;
+    --card: #111926;
+    --card2: #162031;
+    --border: #1e2d40;
+    --border2: #243448;
+    --accent: #00e5c8;
+    --accent2: #00b8a0;
+    --accent-glow: rgba(0,229,200,0.15);
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --green: #10b981;
+    --text: #e8edf3;
+    --text2: #7a8fa6;
+    --text3: #4a6070;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ===== PAGES ===== */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ===== LOGIN PAGE ===== */
+  #loginPage {
+    display: none;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  #loginPage.active { display: grid; grid-template-columns: 1fr 1fr; }
+
+  .login-left {
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+  .login-left::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,229,200,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-icon {
+    width: 48px; height: 48px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .brand-name {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    color: var(--text);
+  }
+
+  .login-hero { margin-top: 60px; }
+  .login-hero h1 {
+    font-family: var(--font-display);
+    font-size: 58px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+  .login-hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .login-hero p {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.7;
+    max-width: 460px;
+    margin-bottom: 40px;
+  }
+
+  .features-list { display: flex; flex-direction: column; gap: 12px; }
+  .feature-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.2s;
+  }
+  .feature-item:hover { border-color: var(--border2); }
+  .feature-icon {
+    width: 36px; height: 36px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .feature-text strong { display: block; font-size: 13px; font-weight: 600; color: var(--text); }
+  .feature-text span { font-size: 12px; color: var(--text2); }
+
+  /* Login right */
+  .login-right {
+    display: flex; align-items: center; justify-content: center;
+    padding: 60px 40px;
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+  }
+
+  .login-card {
+    width: 100%; max-width: 420px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+  }
+
+  .tab-switch {
+    display: flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 28px;
+    gap: 4px;
+  }
+  .tab-btn {
+    flex: 1; padding: 8px 16px;
+    background: transparent;
+    border: none; cursor: pointer;
+    border-radius: 7px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .login-card h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  .login-card p { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+
+  .role-picker {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-bottom: 24px;
+  }
+  .role-btn {
+    padding: 12px 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .role-btn:hover { border-color: var(--border2); }
+  .role-btn.active {
+    background: var(--bg3);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .role-btn .role-icon { font-size: 18px; }
+  .role-btn span { font-size: 11px; font-weight: 500; color: var(--text2); }
+  .role-btn.active span { color: var(--accent); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block; font-size: 10px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.12em;
+    color: var(--text2);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .form-input {
+    width: 100%; padding: 12px 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--text3); }
+
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: var(--accent);
+    border: none; border-radius: 12px;
+    color: #000;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .demo-accounts {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .demo-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .demo-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .demo-row:last-child { border-bottom: none; }
+  .demo-role { font-size: 12px; color: var(--text2); }
+  .demo-email {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,229,200,0.08);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .demo-use {
+    font-size: 11px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    background: none; border: none;
+    display: flex; align-items: center; gap: 4px;
+    transition: opacity 0.2s;
+  }
+  .demo-use:hover { opacity: 0.7; }
+
+  /* ===== APP LAYOUT ===== */
+  #appPage { display: none; }
+  #appPage.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ===== TOPNAV ===== */
+  .topnav {
+    display: flex; align-items: center;
+    padding: 0 24px;
+    height: 64px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .nav-brand { display: flex; align-items: center; gap: 12px; margin-right: 32px; }
+  .nav-icon {
+    width: 36px; height: 36px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .nav-brand-text { display: flex; flex-direction: column; }
+  .nav-brand-name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--text);
+    line-height: 1;
+  }
+  .nav-role {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+
+  .nav-tabs { display: flex; gap: 4px; flex: 1; }
+  .nav-tab {
+    padding: 8px 18px;
+    background: transparent;
+    border: none; cursor: pointer;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    display: flex; align-items: center; gap: 7px;
+    transition: all 0.2s;
+  }
+  .nav-tab:hover { background: var(--card); color: var(--text); }
+  .nav-tab.active {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .user-badge {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #000;
+    flex-shrink: 0;
+  }
+  .user-info { display: flex; flex-direction: column; }
+  .user-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .user-email { font-size: 11px; color: var(--text2); }
+
+  .logout-btn {
+    width: 32px; height: 32px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* ===== MAIN CONTENT ===== */
+  .main-content { padding: 32px 32px; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+  /* ===== HERO SECTION ===== */
+  .dashboard-hero { margin-bottom: 32px; }
+  .dashboard-hero h1 {
+    font-family: var(--font-display);
+    font-size: 44px;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .dashboard-hero h1 em { font-style: italic; color: var(--accent); }
+  .dashboard-hero p { font-size: 14px; color: var(--text2); }
+
+  /* ===== STAT CARDS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .stat-icon {
+    width: 40px; height: 40px;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 16px;
+    background: var(--bg3);
+  }
+  .stat-icon.amber { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.08); }
+  .stat-icon.green { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+  .stat-icon.accent { border-color: rgba(0,229,200,0.3); background: rgba(0,229,200,0.08); }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .stat-value { font-size: 36px; font-weight: 300; color: var(--text); line-height: 1; }
+
+  /* ===== CONTENT GRID ===== */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 20px;
+  }
+
+  /* ===== TABLE CARD ===== */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 600; color: var(--text);
+  }
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    color: var(--text2);
+  }
+  .view-all {
+    font-size: 12px; color: var(--accent);
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    transition: opacity 0.2s;
+  }
+  .view-all:hover { opacity: 0.7; }
+
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table thead th {
+    padding: 12px 24px;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .data-table tbody td {
+    padding: 14px 24px;
+    font-size: 13px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:hover td { background: var(--bg2); }
+
+  .visitor-name { font-weight: 600; }
+  .purpose-text { color: var(--text2); font-size: 12px; }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+  }
+  .status-pill::before { content: '●'; font-size: 8px; }
+  .status-pending { background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+  .status-approved { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+  .status-rejected { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+  .status-checkedin { background: rgba(0,229,200,0.12); color: var(--accent); border: 1px solid rgba(0,229,200,0.2); }
+
+  /* Action buttons */
+  .btn-approve {
+    padding: 6px 14px;
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 8px;
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all 0.2s;
+    margin-right: 6px;
+  }
+  .btn-approve:hover { background: rgba(16,185,129,0.2); }
+
+  .btn-reject {
+    padding: 6px 14px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all 0.2s;
+  }
+  .btn-reject:hover { background: rgba(239,68,68,0.2); }
+
+  .btn-viewpass {
+    padding: 6px 14px;
+    background: rgba(0,229,200,0.1);
+    border: 1px solid rgba(0,229,200,0.3);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all 0.2s;
+  }
+  .btn-viewpass:hover { background: rgba(0,229,200,0.2); }
+
+  .btn-cancel {
+    padding: 6px 14px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 8px;
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all 0.2s;
+  }
+  .btn-cancel:hover { background: rgba(239,68,68,0.15); }
+
+  /* ===== LIVE PANEL ===== */
+  .live-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .live-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  .live-title { font-size: 15px; font-weight: 600; }
+  .live-count { font-size: 12px; color: var(--text2); margin-left: auto; }
+  .live-body { padding: 24px; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+  .empty-state { text-align: center; }
+  .empty-icon { font-size: 36px; opacity: 0.2; margin-bottom: 12px; }
+  .empty-text { font-size: 13px; color: var(--text2); margin-bottom: 4px; }
+  .empty-sub { font-size: 11px; color: var(--text3); }
+
+  /* ===== REQUEST A VISIT BTN ===== */
+  .page-actions { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+  .btn-request {
+    padding: 12px 22px;
+    background: var(--accent);
+    border: none; border-radius: 12px;
+    color: #000;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-request:hover { background: var(--accent2); transform: translateY(-1px); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    width: 100%; max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .modal-title { font-family: var(--font-display); font-size: 26px; }
+  .modal-close {
+    width: 32px; height: 32px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { border-color: var(--red); color: var(--red); }
+
+  .modal-footer {
+    display: flex; gap: 12px; justify-content: flex-end;
+    margin-top: 24px;
+  }
+  .btn-secondary {
+    padding: 12px 20px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--border2); }
+
+  .btn-submit {
+    padding: 12px 22px;
+    background: var(--accent);
+    border: none; border-radius: 10px;
+    color: #000;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-submit:hover { background: var(--accent2); }
+
+  select.form-input { appearance: none; cursor: pointer; }
+
+  /* ===== QR PASS MODAL ===== */
+  .pass-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0;
+    width: 100%; max-width: 420px;
+    overflow: hidden;
+    animation: modalIn 0.2s ease;
+  }
+  .pass-header {
+    background: var(--bg);
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .pass-logo {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .pass-logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .pass-logo-name {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    color: var(--text);
+  }
+  .pass-type {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .pass-body { padding: 28px; }
+  .pass-qr-container {
+    display: flex; justify-content: center;
+    margin-bottom: 24px;
+  }
+  .pass-qr-wrap {
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    display: inline-block;
+  }
+  .pass-details { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .pass-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .pass-row:last-child { border-bottom: none; }
+  .pass-key {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+  .pass-val { font-size: 13px; font-weight: 500; color: var(--text); }
+  .pass-footer {
+    background: var(--bg);
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .pass-footer-text {
+    font-size: 11px; color: var(--text3);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+  }
+  .pass-valid-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 20px;
+    color: var(--green);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    margin-top: 10px;
+  }
+
+  /* ===== SCANNER ===== */
+  .scanner-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .scanner-body {
+    padding: 32px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 20px;
+  }
+  .scanner-viewport {
+    width: 280px; height: 280px;
+    background: var(--bg);
+    border: 2px dashed var(--border2);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scanner-line {
+    position: absolute;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scanLine 2s ease-in-out infinite;
+    top: 0;
+  }
+  @keyframes scanLine {
+    0% { top: 0; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+  .scanner-corner {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--accent);
+    border-style: solid;
+    border-width: 0;
+  }
+  .scanner-corner.tl { top: 12px; left: 12px; border-top-width: 2px; border-left-width: 2px; }
+  .scanner-corner.tr { top: 12px; right: 12px; border-top-width: 2px; border-right-width: 2px; }
+  .scanner-corner.bl { bottom: 12px; left: 12px; border-bottom-width: 2px; border-left-width: 2px; }
+  .scanner-corner.br { bottom: 12px; right: 12px; border-bottom-width: 2px; border-right-width: 2px; }
+  .scanner-icon { font-size: 40px; opacity: 0.3; }
+  .scanner-text { font-size: 12px; color: var(--text3); text-align: center; }
+
+  .manual-checkin {
+    width: 100%; max-width: 360px;
+    display: flex; gap: 10px;
+  }
+  .manual-checkin .form-input { flex: 1; }
+  .btn-scan {
+    padding: 12px 20px;
+    background: var(--accent);
+    border: none; border-radius: 10px;
+    color: #000;
+    font-weight: 600;
+    font-family: var(--font-body);
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .btn-scan:hover { background: var(--accent2); }
+
+  /* ===== VISITOR GREETING ===== */
+  .visitor-greeting { margin-bottom: 20px; }
+  .visitor-greeting h1 {
+    font-family: var(--font-display);
+    font-size: 42px;
+  }
+  .visitor-greeting h1 em { font-style: italic; color: var(--accent); }
+  .visitor-greeting p { color: var(--text2); font-size: 14px; margin-top: 8px; }
+
+  /* ===== TOAST ===== */
+  .toast-container {
+    position: fixed; bottom: 24px; right: 24px;
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 2000;
+  }
+  .toast {
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    animation: toastIn 0.3s ease;
+    max-width: 320px;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .toast-success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--green); }
+  .toast-error { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+  .toast-info { background: rgba(0,229,200,0.1); border: 1px solid rgba(0,229,200,0.25); color: var(--accent); }
+
+  /* ===== SCAN RESULT ===== */
+  .scan-result {
+    width: 100%; max-width: 360px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    display: none;
+    align-items: center; gap: 12px;
+  }
+  .scan-result.show { display: flex; }
+  .scan-result.ok { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); }
+  .scan-result.fail { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); }
+  .scan-result-icon { font-size: 20px; }
+  .scan-result-text { font-size: 13px; }
+  .scan-result-text strong { display: block; font-weight: 600; margin-bottom: 2px; }
+  .scan-result-text span { font-size: 11px; opacity: 0.7; }
+
+  /* Responsive tweaks */
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .content-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 700px) {
+    #loginPage.active { grid-template-columns: 1fr; }
+    .login-left { display: none; }
+    .login-right { padding: 24px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Section hidden by default */
+  .section { display: none; }
+  .section.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN PAGE
+============================================================ -->
+<!-- ===== ADMIN SETUP PAGE (shown only on first launch) ===== -->
+<div id="setupPage" class="page" style="display:none;">
+  <div class="login-left">
+    <div class="brand"><div class="brand-icon">🛡️</div><div class="brand-name">ENTRYZEN</div></div>
+    <div class="login-hero">
+      <h1>First-time<br><em>Setup.</em></h1>
+      <p>No admin account detected. Create the administrator account to get started. This can only be done once.</p>
+      <div class="features-list">
+        <div class="feature-item"><div class="feature-icon">🛡️</div><div class="feature-text"><strong>One Admin Only</strong><span>A single admin governs all user approvals and system access.</span></div></div>
+        <div class="feature-item"><div class="feature-icon">✅</div><div class="feature-text"><strong>Staff Approval</strong><span>Host and Security accounts require admin approval before activation.</span></div></div>
+        <div class="feature-item"><div class="feature-icon">💾</div><div class="feature-text"><strong>All Data Persisted</strong><span>Every account and visitor record is saved to your MySQL database.</span></div></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono);">ENTRYZEN — INITIAL SYSTEM SETUP</div>
+  </div>
+  <div class="login-right">
+    <div class="login-card">
+      <h2>Create <em>Admin</em> account.</h2>
+      <p style="margin-bottom:20px;">This is the master account. Keep these credentials safe.</p>
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="setupName" class="form-input" placeholder="e.g. System Administrator"></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="setupEmail" class="form-input" placeholder="admin@yourorg.com"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group"><label class="form-label">Password</label><input type="password" id="setupPassword" class="form-input" placeholder="••••••••"></div>
+        <div class="form-group"><label class="form-label">Confirm</label><input type="password" id="setupConfirm" class="form-input" placeholder="••••••••"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Phone (optional)</label><input type="tel" id="setupPhone" class="form-input" placeholder="+91 98765 43210"></div>
+      <button class="btn-primary" id="setupBtn" onclick="doSetupAdmin()">🛡️ Create Admin Account</button>
+      <div id="setupError" style="margin-top:12px;font-size:12px;color:var(--red);display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOGIN / REGISTER PAGE ===== -->
+<div id="loginPage" class="page active">
+  <div class="login-left">
+    <div class="brand"><div class="brand-icon">🛡️</div><div class="brand-name">ENTRYZEN</div></div>
+    <div class="login-hero">
+      <h1>Smart<br>Visitor and Security<br><em>Pass Management.</em></h1>
+      <p>A unified control plane for admins, security and visitors. QR-verified passes, real-time logs, and zero-friction entry — beautifully designed.</p>
+      <div class="features-list">
+        <div class="feature-item"><div class="feature-icon">📱</div><div class="feature-text"><strong>QR-Coded Passes</strong><span>One-time, signed visit credentials issued instantly upon approval.</span></div></div>
+        <div class="feature-item"><div class="feature-icon">📡</div><div class="feature-text"><strong>Real-time Tracking</strong><span>Live entry/exit logs with active visitor pulse on the security desk.</span></div></div>
+        <div class="feature-item"><div class="feature-icon">🔐</div><div class="feature-text"><strong>Role-based Access</strong><span>Distinct dashboards for Admin, Host, Security and Visitor flows.</span></div></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono);">ENTRYZEN — BEAUTIFULLY ORCHESTRATED</div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-card">
+      <div class="tab-switch">
+        <button class="tab-btn active" id="tabSignIn" onclick="switchAuthTab('signin')">Sign In</button>
+        <button class="tab-btn" id="tabCreate" onclick="switchAuthTab('create')">Register</button>
+      </div>
+
+      <!-- ===== SIGN IN PANEL ===== -->
+      <div id="panelSignIn">
+        <h2>Welcome back.</h2>
+        <p>Sign in with your credentials.</p>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div class="form-group"><label class="form-label">Password</label><input type="password" id="loginPassword" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn-primary" id="loginBtn" onclick="doLogin()"><span>→</span> Sign In</button>
+        <div id="loginError" style="margin-top:12px;font-size:12px;color:var(--red);display:none;"></div>
+      </div>
+
+      <!-- ===== REGISTER PANEL ===== -->
+      <div id="panelCreate" style="display:none;">
+        <h2>Create account.</h2>
+        <p>Select your role to register.</p>
+
+        <!-- Role picker for registration -->
+        <div class="role-picker" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
+          <div class="role-btn active" data-reg-role="VISITOR" onclick="selectRegRole('VISITOR',this)">
+            <div class="role-icon">👤</div><span>Visitor</span>
+          </div>
+          <div class="role-btn" data-reg-role="HOST" onclick="selectRegRole('HOST',this)">
+            <div class="role-icon">🏢</div><span>Host</span>
+          </div>
+          <div class="role-btn" data-reg-role="SECURITY" onclick="selectRegRole('SECURITY',this)">
+            <div class="role-icon">🔍</div><span>Security</span>
+          </div>
+        </div>
+
+        <!-- Notice for staff roles -->
+        <div id="staffNotice" style="display:none;padding:10px 14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;margin-bottom:14px;">
+          <p style="font-size:11px;color:var(--amber);line-height:1.6;">⚠️ <strong>Host / Security</strong> accounts require Admin approval before you can log in. You will be notified once approved.</p>
+        </div>
+
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="regName" class="form-input" placeholder="e.g. John Smith"></div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" id="regEmail" class="form-input" placeholder="you@example.com"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label class="form-label">Password</label><input type="password" id="regPassword" class="form-input" placeholder="••••••••"></div>
+          <div class="form-group"><label class="form-label">Confirm</label><input type="password" id="regConfirm" class="form-input" placeholder="••••••••"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Phone (optional)</label><input type="tel" id="regPhone" class="form-input" placeholder="+91 98765 43210"></div>
+        <div class="form-group"><label class="form-label">Company / Organisation (optional)</label><input type="text" id="regCompany" class="form-input" placeholder="e.g. Acme Corp"></div>
+        <button class="btn-primary" id="registerBtn" onclick="doRegister()">✦ Create Account</button>
+        <div id="registerError" style="margin-top:12px;font-size:12px;color:var(--red);display:none;"></div>
+        <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3);">Already have an account? <button onclick="switchAuthTab('signin')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;">Sign in →</button></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APP PAGE
+============================================================ -->
+<div id="appPage" class="page">
+  <!-- TOPNAV -->
+  <nav class="topnav">
+    <div class="nav-brand">
+      <div class="nav-icon">🛡️</div>
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">SENTINEL</div>
+        <div class="nav-role" id="navRole">— ADMIN</div>
+      </div>
+    </div>
+
+    <div class="nav-tabs" id="navTabs"></div>
+
+    <div class="nav-right">
+      <div class="user-badge">
+        <div class="user-avatar" id="userAvatar">AR</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Aaron Reyes</div>
+          <div class="user-email" id="userEmail">admin@vms.com</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()" title="Sign out">⇥</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content" id="mainContent"></div>
+</div>
+
+<!-- ============================================================
+     MODALS
+============================================================ -->
+<!-- Request Visit Modal -->
+<div class="modal-overlay" id="requestModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Request a visit</h2>
+      <button class="modal-close" onclick="closeModal('requestModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Purpose of Visit</label>
+      <textarea id="visitPurpose" class="form-input" rows="4" placeholder="e.g. Quarterly review meeting with engineering team" style="resize:vertical;"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label class="form-label">Host</label>
+        <select id="visitHost" class="form-input">
+          <option value="">— Select a host —</option>
+          <option value="Priya Banerjee">Priya Banerjee</option>
+          <option value="Aaron Reyes">Aaron Reyes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date &amp; Time</label>
+        <input type="datetime-local" id="visitDateTime" class="form-input">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('requestModal')">Cancel</button>
+      <button class="btn-submit" onclick="submitVisitRequest()">📨 Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR Pass Modal -->
+<div class="modal-overlay" id="passModal">
+  <div class="pass-modal">
+    <div class="pass-header">
+      <div class="pass-logo">
+        <div class="pass-logo-icon">🛡️</div>
+        <div class="pass-logo-name">SENTINEL</div>
+      </div>
+      <div class="pass-type">VISITOR ACCESS PASS</div>
+    </div>
+    <div class="pass-body">
+      <div class="pass-qr-container">
+        <div class="pass-qr-wrap" id="passQrCode"></div>
+      </div>
+      <div class="pass-details" id="passDetails"></div>
+      <div style="text-align:center;">
+        <div class="pass-valid-badge">● VALID PASS</div>
+      </div>
+    </div>
+    <div class="pass-footer">
+      <div class="pass-footer-text">SHOW THIS TO SECURITY AT ENTRY</div>
+      <button class="btn-secondary" onclick="closeModal('passModal')" style="margin-top:12px;width:100%;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// =============================================
+// CONFIG
+// =============================================
+const API = 'http://' + window.location.hostname + ':8080/api';
+
+// =============================================
+// SESSION (localStorage)
+// =============================================
+function saveSession(data) {
+  try { localStorage.setItem('sentinel_session', JSON.stringify(data)); } catch(e) {}
+}
+function loadSession() {
+  try { return JSON.parse(localStorage.getItem('sentinel_session')); } catch(e) { return null; }
+}
+function clearSession() {
+  try { localStorage.removeItem('sentinel_session'); } catch(e) {}
+}
+
+
+// =============================================
+// JWT HELPER — check expiry without backend call
+// =============================================
+function isTokenExpired(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    // exp is in seconds, Date.now() is in ms
+    return payload.exp * 1000 < Date.now();
+  } catch(e) {
+    return true; // treat malformed token as expired
+  }
+}
+
+// =============================================
+// STATE
+// =============================================
+let state = {
+  currentUser:   null,   // { token, role, name, email, userId }
+  currentRole:   null,
+  activeTab:     'overview',
+  visitors:      [],
+  requests:      [],
+  hosts:         [],
+  activePremise: [],
+  pendingStaff:  [],
+};
+
+let selectedRegRole = 'VISITOR';
+
+// =============================================
+// API HELPERS
+// =============================================
+async function apiCall(method, path, body, auth = true) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth && state.currentUser?.token) {
+    headers['Authorization'] = 'Bearer ' + state.currentUser.token;
+  }
+  const res = await fetch(API + path, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) {
+    // Token expired or invalid — clear session and force re-login
+    clearSession();
+    state.currentUser = null;
+    state.currentRole = null;
+    document.getElementById('appPage').classList.remove('active');
+    document.getElementById('loginPage').classList.add('active');
+    throw new Error('Session expired. Please sign in again.');
+  }
+  if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
+  return data;
+}
+
+// =============================================
+// ROLE CONFIG
+// =============================================
+const ROLE_CONFIG = {
+  ADMIN: {
+    label: '— ADMIN',
+    tabs: [
+      { id: 'overview',  label: 'Overview',  icon: '⊞' },
+      { id: 'requests',  label: 'Requests',  icon: '📋' },
+      { id: 'logs',      label: 'Logs',      icon: '📊' },
+      { id: 'visitors',  label: 'Visitors',  icon: '👥' },
+      { id: 'staff',     label: 'Staff',     icon: '👔' },
+      { id: 'approvals', label: 'Approvals', icon: '⏳' },
+    ]
+  },
+  SECURITY: {
+    label: '— SECURITY',
+    tabs: [
+      { id: 'overview', label: 'Overview', icon: '⊞' },
+      { id: 'scanqr',   label: 'Scan QR',  icon: '⊟' },
+      { id: 'active',   label: 'Active',   icon: '📡' },
+    ]
+  },
+  HOST: {
+    label: '— HOST',
+    tabs: [
+      { id: 'overview',  label: 'Overview',  icon: '⊞' },
+      { id: 'requests',  label: 'Requests',  icon: '📋' },
+      { id: 'logs',      label: 'Logs',      icon: '📊' },
+    ]
+  },
+  VISITOR: {
+    label: '— VISITOR',
+    tabs: [
+      { id: 'myvisits', label: 'My Visits', icon: '📅' },
+    ]
+  },
+};
+
+// =============================================
+// INIT — check if admin exists, show correct screen
+// =============================================
+async function init() {
+  // Always clear any saved session on page load — require fresh login every time
+  clearSession();
+
+  // (Session restore intentionally disabled: users must log in on every page load)
+
+  // Check if admin has been set up
+  try {
+    const res = await fetch(API + '/auth/admin-exists');
+    const data = await res.json();
+    if (!data.exists) {
+      // Show first-time setup page
+      document.getElementById('loginPage').classList.remove('active');
+      document.getElementById('setupPage').style.display = 'flex';
+      document.getElementById('setupPage').classList.add('active');
+      return;
+    }
+  } catch(e) {
+    showToast('Cannot reach server. Is the Spring Boot backend running?', 'error');
+  }
+  // Show normal login
+  document.getElementById('loginPage').classList.add('active');
+}
+
+window.addEventListener('load', init);
+
+// =============================================
+// ADMIN SETUP (first launch)
+// =============================================
+async function doSetupAdmin() {
+  const name     = document.getElementById('setupName').value.trim();
+  const email    = document.getElementById('setupEmail').value.trim().toLowerCase();
+  const password = document.getElementById('setupPassword').value;
+  const confirm  = document.getElementById('setupConfirm').value;
+  const phone    = document.getElementById('setupPhone').value.trim();
+  const errEl    = document.getElementById('setupError');
+  errEl.style.display = 'none';
+
+  if (!name || !email || !password) { showSetupError('Please fill in all required fields.'); return; }
+  if (password !== confirm) { showSetupError('Passwords do not match.'); return; }
+  if (password.length < 8) { showSetupError('Password must be at least 8 characters.'); return; }
+
+  setBtnLoading('setupBtn', true);
+  try {
+    const data = await apiCall('POST', '/auth/register/admin', { name, email, password, phone }, false);
+    state.currentUser = { token: data.token, role: data.role, name: data.name, email: data.email, userId: data.userId };
+    state.currentRole = data.role;
+    state.activeTab   = 'overview';
+    saveSession(state.currentUser);
+    document.getElementById('setupPage').classList.remove('active');
+    document.getElementById('setupPage').style.display = 'none';
+    showApp();
+    showToast('Admin account created. Welcome, ' + data.name.split(' ')[0] + '!', 'success');
+    await refreshData();
+  } catch(e) {
+    showSetupError(e.message);
+  }
+  setBtnLoading('setupBtn', false);
+}
+
+function showSetupError(msg) {
+  const el = document.getElementById('setupError');
+  el.textContent = '✗ ' + msg;
+  el.style.display = 'block';
+}
+
+// =============================================
+// AUTH TAB SWITCHING
+// =============================================
+function switchAuthTab(tab) {
+  const isSignIn = tab === 'signin';
+  document.getElementById('tabSignIn').classList.toggle('active', isSignIn);
+  document.getElementById('tabCreate').classList.toggle('active', !isSignIn);
+  document.getElementById('panelSignIn').style.display = isSignIn ? '' : 'none';
+  document.getElementById('panelCreate').style.display = isSignIn ? 'none' : '';
+}
+
+function selectRegRole(role, el) {
+  selectedRegRole = role;
+  document.querySelectorAll('[data-reg-role]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const isStaff = role === 'HOST' || role === 'SECURITY';
+  document.getElementById('staffNotice').style.display = isStaff ? 'block' : 'none';
+}
+
+// =============================================
+// LOGIN
+// =============================================
+async function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+  const errEl    = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!email || !password) { showLoginError('Please enter your email and password.'); return; }
+
+  setBtnLoading('loginBtn', true);
+  try {
+    const data = await apiCall('POST', '/auth/login', { email, password }, false);
+    state.currentUser = { token: data.token, role: data.role, name: data.name, email: data.email, userId: data.userId };
+    state.currentRole = data.role;
+    state.activeTab   = ROLE_CONFIG[data.role]?.tabs[0]?.id || 'overview';
+    saveSession(state.currentUser);
+    document.getElementById('loginPage').classList.remove('active');
+    showApp();
+    showToast('Welcome back, ' + data.name.split(' ')[0] + '!', 'success');
+    await refreshData();
+  } catch(e) {
+    showLoginError(e.message);
+  }
+  setBtnLoading('loginBtn', false);
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = '✗ ' + msg;
+  el.style.display = 'block';
+}
+
+// =============================================
+// REGISTER
+// =============================================
+async function doRegister() {
+  const name     = document.getElementById('regName').value.trim();
+  const email    = document.getElementById('regEmail').value.trim().toLowerCase();
+  const password = document.getElementById('regPassword').value;
+  const confirm  = document.getElementById('regConfirm').value;
+  const phone    = document.getElementById('regPhone').value.trim();
+  const company  = document.getElementById('regCompany').value.trim();
+  const errEl    = document.getElementById('registerError');
+  errEl.style.display = 'none';
+
+  if (!name || !email || !password) { showRegError('Please fill in all required fields.'); return; }
+  if (password !== confirm) { showRegError('Passwords do not match.'); return; }
+  if (password.length < 6) { showRegError('Password must be at least 6 characters.'); return; }
+
+  const isStaff = selectedRegRole === 'HOST' || selectedRegRole === 'SECURITY';
+  const endpoint = isStaff ? '/auth/register/staff-request' : '/auth/register/visitor';
+
+  setBtnLoading('registerBtn', true);
+  try {
+    const data = await apiCall('POST', endpoint, { name, email, password, phone, company, role: selectedRegRole }, false);
+    showToast(data.message, 'success');
+
+    if (!isStaff) {
+      // Visitor: auto-login
+      const loginData = await apiCall('POST', '/auth/login', { email, password }, false);
+      state.currentUser = { token: loginData.token, role: loginData.role, name: loginData.name, email: loginData.email, userId: loginData.userId };
+      state.currentRole = loginData.role;
+      state.activeTab   = ROLE_CONFIG[loginData.role]?.tabs[0]?.id || 'myvisits';
+      saveSession(state.currentUser);
+      document.getElementById('loginPage').classList.remove('active');
+      showApp();
+      await refreshData();
+    } else {
+      // Staff: show success, go to sign in
+      switchAuthTab('signin');
+      showToast('Your request is pending admin approval.', 'info');
+    }
+    // Clear form
+    ['regName','regEmail','regPassword','regConfirm','regPhone','regCompany'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value = '';
+    });
+  } catch(e) {
+    showRegError(e.message);
+  }
+  setBtnLoading('registerBtn', false);
+}
+
+function showRegError(msg) {
+  const el = document.getElementById('registerError');
+  el.textContent = '✗ ' + msg;
+  el.style.display = 'block';
+}
+
+// =============================================
+// LOGOUT
+// =============================================
+function doLogout() {
+  stopCameraScanner();
+  state.currentUser = null;
+  state.currentRole = null;
+  state.visitors = [];
+  state.requests = [];
+  state.hosts = [];
+  state.activePremise = [];
+  state.pendingStaff = [];
+  clearSession();
+  document.getElementById('appPage').classList.remove('active');
+  document.getElementById('loginPage').classList.add('active');
+  switchAuthTab('signin');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
+// =============================================
+// SHOW APP
+// =============================================
+function showApp() {
+  document.getElementById('appPage').classList.add('active');
+  renderNav();
+  renderContent();
+}
+
+// =============================================
+// DATA REFRESH FROM API
+// =============================================
+async function refreshData() {
+  const role = state.currentRole;
+  try {
+    if (role === 'ADMIN' || role === 'HOST' || role === 'SECURITY') {
+      const [reqData, visData] = await Promise.all([
+        apiCall('GET', '/visit-requests'),
+        apiCall('GET', '/visitors'),
+      ]);
+      state.requests = reqData || [];
+      state.visitors = visData || [];
+    }
+    if (role === 'VISITOR') {
+      const reqData = await apiCall('GET', '/visit-requests');
+      state.requests = (reqData || []).filter(r =>
+        r.visitor?.user?.email === state.currentUser.email
+      );
+    }
+    if (role === 'ADMIN') {
+      const [staffData, pendingData] = await Promise.all([
+        apiCall('GET', '/users'),
+        apiCall('GET', '/auth/pending'),
+      ]);
+      state.hosts        = (staffData || []).filter(u => u.role === 'HOST');
+      state.pendingStaff = pendingData || [];
+    }
+    if (role === 'HOST' || role === 'VISITOR') {
+      const hosts = await apiCall('GET', '/users/hosts');
+      state.hosts = hosts || [];
+    }
+  } catch(e) {
+    console.warn('Data refresh error:', e.message);
+  }
+  renderContent();
+}
+
+// =============================================
+// NAV RENDERING
+// =============================================
+function renderNav() {
+  const user = state.currentUser;
+  const cfg  = ROLE_CONFIG[state.currentRole];
+  if (!user || !cfg) return;
+
+  const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('navRole').textContent = cfg.label;
+  document.getElementById('userAvatar').textContent = initials;
+  document.getElementById('userName').textContent = user.name;
+  document.getElementById('userEmail').textContent = user.email;
+
+  document.getElementById('navTabs').innerHTML = cfg.tabs.map(t => `
+    <button class="nav-tab ${t.id === state.activeTab ? 'active' : ''}" onclick="switchTab('${t.id}')">
+      ${t.icon} ${t.label}
+    </button>
+  `).join('');
+}
+
+function switchTab(tabId) {
+  stopCameraScanner();
+  state.activeTab = tabId;
+  renderNav();
+  renderContent();
+  if (tabId === 'approvals') loadPendingStaff();
+  if (tabId === 'overview' || tabId === 'requests' || tabId === 'visitors' || tabId === 'logs' || tabId === 'staff') refreshData();
+}
+
+// =============================================
+// CONTENT RENDERING
+// =============================================
+function renderContent() {
+  const el = document.getElementById('mainContent');
+  const r  = state.currentRole;
+  const t  = state.activeTab;
+  if (!el) return;
+
+  if (r === 'ADMIN') {
+    if (t === 'overview')  el.innerHTML = renderAdminOverview();
+    else if (t === 'requests')  el.innerHTML = renderRequestsPage('ADMIN');
+    else if (t === 'logs')      el.innerHTML = renderLogsPage();
+    else if (t === 'visitors')  el.innerHTML = renderVisitorsPage();
+    else if (t === 'staff')     el.innerHTML = renderStaffPage();
+    else if (t === 'approvals') el.innerHTML = renderApprovalsPage();
+  } else if (r === 'HOST') {
+    if (t === 'overview')  el.innerHTML = renderAdminOverview();
+    else if (t === 'requests')  el.innerHTML = renderRequestsPage('HOST');
+    else if (t === 'logs')      el.innerHTML = renderLogsPage();
+  } else if (r === 'SECURITY') {
+    if (t === 'overview') el.innerHTML = renderSecurityOverview();
+    else if (t === 'scanqr') el.innerHTML = renderScanPage();
+    else if (t === 'active') el.innerHTML = renderActivePage();
+  } else if (r === 'VISITOR') {
+    el.innerHTML = renderVisitorDashboard();
+  }
+}
+
+// =============================================
+// ADMIN OVERVIEW
+// =============================================
+function renderAdminOverview() {
+  const pending  = state.requests.filter(r => r.status === 'PENDING');
+  const approved = state.requests.filter(r => r.status === 'APPROVED');
+  const active   = state.activePremise;
+  const pendingStaffCount = state.pendingStaff.length;
+
+  return `
+    <div class="dashboard-hero">
+      <h1>Visitor flow,<br><em>orchestrated.</em></h1>
+      <p>Monitor, approve, and manage all visitor activity across your facility.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Registered Visitors</div><div class="stat-value">${state.visitors.length}</div></div>
+      <div class="stat-card"><div class="stat-icon amber">⏳</div><div class="stat-label">Pending Requests</div><div class="stat-value">${pending.length}</div></div>
+      <div class="stat-card"><div class="stat-icon green">→</div><div class="stat-label">Active On-Premise</div><div class="stat-value">${active.length}</div></div>
+      <div class="stat-card"><div class="stat-icon accent">✓</div><div class="stat-label">Approved Passes</div><div class="stat-value">${approved.length}</div></div>
+    </div>
+    ${pendingStaffCount > 0 ? `
+    <div style="padding:14px 18px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;margin-bottom:24px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:20px;">⏳</span>
+      <div><strong style="color:var(--amber);">${pendingStaffCount} staff registration${pendingStaffCount>1?'s':''} awaiting your approval.</strong>
+      <a onclick="switchTab('approvals')" style="color:var(--accent);cursor:pointer;margin-left:8px;font-size:13px;">Review now →</a></div>
+    </div>` : ''}
+    <div class="content-grid">
+      <div class="table-card">
+        <div class="card-header">
+          <div class="card-title">⏳ Awaiting Decision <span class="badge">${pending.length} pending</span></div>
+          <button class="view-all" onclick="switchTab('requests')">View all →</button>
+        </div>
+        <table class="data-table"><thead><tr><th>Visitor</th><th>Purpose</th><th>When</th><th>Action</th></tr></thead><tbody>
+          ${pending.length === 0 ? `<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:32px;">No pending requests</td></tr>` : ''}
+          ${pending.slice(0,5).map(r => `<tr>
+            <td><div class="visitor-name">${r.visitor?.name || '—'}</div></td>
+            <td><div class="purpose-text">${r.purpose}</div></td>
+            <td>${formatDT(r.visitDate)}</td>
+            <td>
+              <button class="btn-approve" onclick="approveRequest(${r.id})">✓ Approve</button>
+              <button class="btn-reject" onclick="rejectRequest(${r.id})">✕ Reject</button>
+            </td>
+          </tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div class="live-card">
+        <div class="live-header"><div class="live-dot"></div><div class="live-title">Live On-Premise</div><div class="live-count">${active.length} active</div></div>
+        <div class="live-body">${active.length === 0 ? `<div class="empty-state"><div class="empty-icon">🚪</div><div class="empty-text">No active visitors.</div><div class="empty-sub">Check-ins appear here in real time.</div></div>` :
+          active.map(v=>`<div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+            <div style="width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;"></div>
+            <div><div style="font-size:13px;font-weight:600;">${v.name}</div><div style="font-size:11px;color:var(--text2);">Checked in ${v.time}</div></div>
+          </div>`).join('')
+        }</div>
+      </div>
+    </div>
+  `;
+}
+
+// =============================================
+// REQUESTS PAGE
+// =============================================
+function renderRequestsPage(role) {
+  const reqs = role === 'HOST'
+    ? state.requests.filter(r => r.host?.email === state.currentUser.email)
+    : state.requests;
+
+  return `
+    <div class="dashboard-hero"><h1>Visit <em>Requests.</em></h1><p>Review and manage visitor access requests.</p></div>
+    <div class="table-card">
+      <div class="card-header"><div class="card-title">📋 All Requests <span class="badge">${reqs.length} total</span></div></div>
+      <table class="data-table"><thead><tr><th>Visitor</th><th>Purpose</th><th>Host</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody>
+        ${reqs.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px;">No requests yet</td></tr>` : ''}
+        ${reqs.map(r => `<tr>
+          <td><div class="visitor-name">${r.visitor?.name || '—'}</div></td>
+          <td><div class="purpose-text">${r.purpose}</div></td>
+          <td>${r.host?.name || '—'}</td>
+          <td>${formatDT(r.visitDate)}</td>
+          <td><span class="status-pill status-${(r.status||'').toLowerCase()}">${r.status || '—'}</span></td>
+          <td>
+            ${r.status === 'PENDING' ? `<button class="btn-approve" onclick="approveRequest(${r.id})">✓</button> <button class="btn-reject" onclick="rejectRequest(${r.id})">✕</button>` : ''}
+            ${r.status === 'APPROVED' ? `<button class="btn-viewpass" onclick="viewPassFromRequest(${JSON.stringify(r).replace(/"/g,'&quot;')})">📱 Pass</button>` : ''}
+          </td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+}
+
+// =============================================
+// LOGS PAGE
+// =============================================
+function renderLogsPage() {
+  const all = [...state.requests].reverse();
+  return `
+    <div class="dashboard-hero"><h1>Activity <em>Logs.</em></h1><p>Full audit trail of all visitor activity.</p></div>
+    <div class="table-card">
+      <div class="card-header"><div class="card-title">📊 Event Log <span class="badge">${all.length} entries</span></div></div>
+      <table class="data-table"><thead><tr><th>ID</th><th>Visitor</th><th>Purpose</th><th>Host</th><th>Date</th><th>Status</th></tr></thead><tbody>
+        ${all.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px;">No logs yet</td></tr>` : ''}
+        ${all.map(r => `<tr>
+          <td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text3);">#${r.id}</span></td>
+          <td><div class="visitor-name">${r.visitor?.name || '—'}</div></td>
+          <td><div class="purpose-text">${r.purpose}</div></td>
+          <td>${r.host?.name || '—'}</td>
+          <td>${formatDT(r.visitDate)}</td>
+          <td><span class="status-pill status-${(r.status||'').toLowerCase()}">${r.status || '—'}</span></td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+}
+
+// =============================================
+// VISITORS PAGE
+// =============================================
+function renderVisitorsPage() {
+  return `
+    <div class="dashboard-hero"><h1>Registered <em>Visitors.</em></h1><p>All visitors in the system.</p></div>
+    <div class="table-card">
+      <div class="card-header"><div class="card-title">👥 Visitor Directory <span class="badge">${state.visitors.length} registered</span></div></div>
+      <table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Blacklisted</th><th>Total Visits</th></tr></thead><tbody>
+        ${state.visitors.length === 0 ? `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px;">No visitors yet</td></tr>` : ''}
+        ${state.visitors.map(v => `<tr>
+          <td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text3);">#${v.id}</span></td>
+          <td><div class="visitor-name">${v.name}</div></td>
+          <td style="color:var(--text2);">${v.phone || '—'}</td>
+          <td>${v.blacklisted ? '<span style="color:var(--red);">⛔ Yes</span>' : '<span style="color:var(--green);">✓ No</span>'}</td>
+          <td>${state.requests.filter(r => r.visitor?.id === v.id).length}</td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+}
+
+// =============================================
+// STAFF PAGE (Admin)
+// =============================================
+function renderStaffPage() {
+  const allStaff = (state.hosts || []).concat(
+    (state.visitors?.filter?.(v => false) || []) // placeholder for future
+  );
+  // Load from users list if we have it
+  return `
+    <div class="dashboard-hero"><h1>Staff <em>Management.</em></h1><p>All active Host and Security accounts.</p></div>
+    <div id="staffTableContainer">
+      <div class="table-card">
+        <div class="card-header"><div class="card-title">👔 Active Staff</div></div>
+        <p style="padding:16px;color:var(--text2);font-size:13px;">Loading staff data…</p>
+      </div>
+    </div>`;
+}
+
+async function loadStaffTable() {
+  try {
+    const users = await apiCall('GET', '/users');
+    const staff = users.filter(u => u.role === 'HOST' || u.role === 'SECURITY');
+    const el = document.getElementById('staffTableContainer');
+    if (!el) return;
+    el.innerHTML = `<div class="table-card">
+      <div class="card-header"><div class="card-title">👔 Active Staff <span class="badge">${staff.length} members</span></div></div>
+      <table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Company</th></tr></thead><tbody>
+        ${staff.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px;">No staff accounts yet</td></tr>` : ''}
+        ${staff.map(u => `<tr>
+          <td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text3);">#${u.id}</span></td>
+          <td><div class="visitor-name">${u.name}</div></td>
+          <td style="color:var(--text2);">${u.email}</td>
+          <td><span class="status-pill" style="background:${u.role==='HOST'?'rgba(0,229,200,0.15)':'rgba(245,158,11,0.15)'};">${u.role}</span></td>
+          <td>${u.phone || '—'}</td>
+          <td>${u.company || '—'}</td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+  } catch(e) {
+    showToast('Failed to load staff data.', 'error');
+  }
+}
+
+// =============================================
+// APPROVALS PAGE (Admin)
+// =============================================
+function renderApprovalsPage() {
+  return `
+    <div class="dashboard-hero"><h1>Staff <em>Approvals.</em></h1><p>Review and approve or reject pending Host and Security account requests.</p></div>
+    <div id="pendingContainer">
+      <div class="table-card"><div class="card-header"><div class="card-title">⏳ Pending Registrations</div></div>
+      <p style="padding:16px;color:var(--text2);font-size:13px;">Loading…</p></div>
+    </div>`;
+}
+
+async function loadPendingStaff() {
+  try {
+    const pending = await apiCall('GET', '/auth/pending');
+    state.pendingStaff = pending || [];
+    renderPendingTable();
+  } catch(e) {
+    showToast('Failed to load pending registrations.', 'error');
+  }
+}
+
+function renderPendingTable() {
+  const el = document.getElementById('pendingContainer');
+  if (!el) return;
+  const p = state.pendingStaff;
+  el.innerHTML = `<div class="table-card">
+    <div class="card-header"><div class="card-title">⏳ Pending Registrations <span class="badge">${p.length} waiting</span></div></div>
+    <table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Company</th><th>Requested</th><th>Action</th></tr></thead><tbody>
+      ${p.length === 0 ? `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px;">✓ No pending registrations</td></tr>` : ''}
+      ${p.map(r => `<tr>
+        <td><div class="visitor-name">${r.name}</div></td>
+        <td style="color:var(--text2);">${r.email}</td>
+        <td><span class="status-pill" style="background:${r.role==='HOST'?'rgba(0,229,200,0.15)':'rgba(245,158,11,0.15)'};">${r.role}</span></td>
+        <td>${r.phone || '—'}</td>
+        <td>${r.company || '—'}</td>
+        <td style="font-size:12px;color:var(--text2);">${formatDT(r.requestedAt)}</td>
+        <td>
+          <button class="btn-approve" onclick="approveStaff(${r.id})">✓ Approve</button>
+          <button class="btn-reject" onclick="rejectStaff(${r.id})">✕ Reject</button>
+        </td>
+      </tr>`).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+async function approveStaff(id) {
+  try {
+    const res = await apiCall('POST', `/auth/approve/${id}`);
+    showToast(res.message, 'success');
+    await loadPendingStaff();
+    renderNav(); // refresh badge
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function rejectStaff(id) {
+  try {
+    const res = await apiCall('POST', `/auth/reject/${id}`);
+    showToast(res.message, 'error');
+    await loadPendingStaff();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// =============================================
+// SECURITY OVERVIEW
+// =============================================
+function renderSecurityOverview() {
+  const approved  = state.requests.filter(r => r.status === 'APPROVED');
+  const checkedIn = state.requests.filter(r => r.checkInTime);
+  const active    = state.activePremise;
+
+  return `
+    <div class="dashboard-hero"><h1>Gate <em>operations.</em></h1><p>Scan visitor passes, verify identity, and oversee real-time entry.</p></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon green">→</div><div class="stat-label">On-Premise Now</div><div class="stat-value">${active.length}</div></div>
+      <div class="stat-card"><div class="stat-icon">📥</div><div class="stat-label">Today's Check-ins</div><div class="stat-value">${checkedIn.length}</div></div>
+      <div class="stat-card"><div class="stat-icon accent">📱</div><div class="stat-label">Approved Passes</div><div class="stat-value">${approved.length}</div></div>
+      <div class="stat-card"><div class="stat-icon">📤</div><div class="stat-label">Today's Check-outs</div><div class="stat-value">0</div></div>
+    </div>
+    <div class="content-grid">
+      <div class="scanner-card">
+        <div class="card-header"><div class="card-title">📱 Scan a Visitor Pass</div></div>
+        <div class="scanner-body">
+          <p style="font-size:13px;color:var(--text2);">Use your camera to scan a QR-coded pass and verify entry instantly.</p>
+          <div class="scanner-viewport" id="scanViewport" style="position:relative;overflow:hidden;">
+            <video id="scanVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:none;border-radius:8px;"></video>
+            <canvas id="scanCanvas" style="display:none;"></canvas>
+            <div class="scanner-line" id="scanLine"></div>
+            <div class="scanner-corner tl"></div><div class="scanner-corner tr"></div>
+            <div class="scanner-corner bl"></div><div class="scanner-corner br"></div>
+            <div class="scanner-icon" id="scanIcon">📷</div>
+            <div class="scanner-text" id="scanText">Press <strong>Start Camera</strong> to scan</div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;margin:12px 0;">
+            <button class="btn-scan" id="btnStartCam" onclick="startCameraScanner()">📷 Start Camera</button>
+            <button class="btn-scan" id="btnStopCam" onclick="stopCameraScanner()" style="display:none;background:var(--red);">⏹ Stop</button>
+          </div>
+          <p style="font-size:12px;color:var(--text3);">— or manually enter pass ID —</p>
+          <div class="manual-checkin">
+            <input type="text" id="manualPassId" class="form-input" placeholder="e.g. PASS-8X2K">
+            <button class="btn-scan" onclick="manualCheckin()">Check In</button>
+          </div>
+          <div class="scan-result" id="scanResult">
+            <div class="scan-result-icon"></div>
+            <div class="scan-result-text"><strong></strong><span></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="live-card">
+        <div class="live-header"><div class="live-dot"></div><div class="live-title">Live On-Premise</div><div class="live-count">${active.length} active</div></div>
+        <div class="live-body" id="livePremise">
+          ${active.length === 0 ? `<div class="empty-state"><div class="empty-icon">🚪</div><div class="empty-text">No active visitors right now.</div></div>` :
+            active.map(v=>`<div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+              <div style="width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;"></div>
+              <div><div style="font-size:13px;font-weight:600;">${v.name}</div><div style="font-size:11px;color:var(--text2);">Checked in ${v.time}</div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderScanPage() {
+  return `
+    <div class="dashboard-hero"><h1>QR <em>Scanner.</em></h1><p>Scan visitor passes at the gate using your camera, or enter the pass ID manually.</p></div>
+    <div class="scanner-card" style="max-width:520px;">
+      <div class="scanner-body">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Point the camera at a visitor's QR pass to verify entry instantly.</p>
+        <div class="scanner-viewport" id="scanViewport" style="position:relative;overflow:hidden;">
+          <video id="scanVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:none;border-radius:8px;"></video>
+          <canvas id="scanCanvas" style="display:none;"></canvas>
+          <div class="scanner-line" id="scanLine"></div>
+          <div class="scanner-corner tl"></div><div class="scanner-corner tr"></div>
+          <div class="scanner-corner bl"></div><div class="scanner-corner br"></div>
+          <div class="scanner-icon" id="scanIcon">📷</div>
+          <div class="scanner-text" id="scanText">Press <strong>Start Camera</strong> to begin scanning</div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;margin:12px 0;">
+          <button class="btn-scan" id="btnStartCam" onclick="startCameraScanner()">📷 Start Camera</button>
+          <button class="btn-scan" id="btnStopCam" onclick="stopCameraScanner()" style="display:none;background:var(--red);">⏹ Stop Camera</button>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin:8px 0;">— or manually enter pass ID —</p>
+        <div class="manual-checkin">
+          <input type="text" id="manualPassId" class="form-input" placeholder="e.g. PASS-8X2K">
+          <button class="btn-scan" onclick="manualCheckin()">Check In</button>
+        </div>
+        <div class="scan-result" id="scanResult">
+          <div class="scan-result-icon"></div>
+          <div class="scan-result-text"><strong></strong><span></span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderActivePage() {
+  return `
+    <div class="dashboard-hero"><h1>Active <em>Visitors.</em></h1><p>Everyone currently on premise in real time.</p></div>
+    <div class="live-card">
+      <div class="live-header"><div class="live-dot"></div><div class="live-title">Live On-Premise</div><div class="live-count">${state.activePremise.length} active</div></div>
+      <div class="live-body">
+        ${state.activePremise.length === 0 ? `<div class="empty-state"><div class="empty-icon">🚪</div><div class="empty-text">No active visitors right now.</div><div class="empty-sub">Use the QR scanner to check in visitors.</div></div>` :
+          state.activePremise.map(v=>`<div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;"></div>
+              <div><div style="font-size:13px;font-weight:600;">${v.name}</div><div style="font-size:11px;color:var(--text2);">Checked in ${v.time}</div></div>
+            </div>
+            <button class="btn-reject" onclick="checkOut('${v.passId}')">Check Out</button>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// =============================================
+// VISITOR DASHBOARD
+// =============================================
+function renderVisitorDashboard() {
+  const user = state.currentUser;
+  const firstName = user.name.split(' ')[0];
+  const myReqs = state.requests;
+  const pending  = myReqs.filter(r => r.status === 'PENDING').length;
+  const approved = myReqs.filter(r => r.status === 'APPROVED').length;
+  const done     = myReqs.filter(r => r.checkInTime).length;
+
+  const hostOptions = state.hosts.map(h => `<option value="${h.id}">${h.name}</option>`).join('');
+
+  return `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+      <div class="visitor-greeting"><h1>Hello, <em>${firstName}</em></h1><p>Request a visit, follow its journey, and arrive frictionlessly with a QR-coded pass.</p></div>
+      <button class="btn-request" onclick="openModal('requestModal')">📅 Request a Visit</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">📨</div><div class="stat-label">Total Requests</div><div class="stat-value">${myReqs.length}</div></div>
+      <div class="stat-card"><div class="stat-icon amber">⏳</div><div class="stat-label">Pending</div><div class="stat-value">${pending}</div></div>
+      <div class="stat-card"><div class="stat-icon accent">✓</div><div class="stat-label">Approved</div><div class="stat-value">${approved}</div></div>
+      <div class="stat-card"><div class="stat-icon green">→</div><div class="stat-label">Completed Visits</div><div class="stat-value">${done}</div></div>
+    </div>
+    <div class="table-card">
+      <div class="card-header"><div class="card-title">📋 My Visit Requests <span class="badge">${myReqs.length} total</span></div></div>
+      <table class="data-table"><thead><tr><th>Purpose</th><th>Host</th><th>Visit Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+        ${myReqs.length === 0 ? `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px;">No visit requests yet. Click "Request a Visit" to get started.</td></tr>` : ''}
+        ${myReqs.map(r => `<tr>
+          <td><div class="visitor-name">${r.purpose}</div></td>
+          <td>${r.host?.name || '—'}</td>
+          <td>${formatDT(r.visitDate)}</td>
+          <td><span class="status-pill status-${(r.status||'').toLowerCase()}">${r.status || '—'}</span></td>
+          <td>
+            ${r.status === 'PENDING' ? `<button class="btn-cancel" onclick="cancelRequest(${r.id})">✕ Cancel</button>` : ''}
+            ${r.status === 'APPROVED' ? `<button class="btn-viewpass" onclick="viewPassFromRequest(${JSON.stringify(r).replace(/"/g,'&quot;')})">📱 View Pass</button>` : ''}
+          </td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>
+    <!-- Host selector (hidden, used by visit request modal) -->
+    <div id="hostOptionsCache" style="display:none;">${hostOptions}</div>`;
+}
+
+// =============================================
+// ACTIONS — VISIT REQUESTS
+// =============================================
+async function approveRequest(id) {
+  try {
+    await apiCall('PUT', `/visit-requests/${id}/approve`);
+    showToast('Request approved and pass issued.', 'success');
+    await refreshData();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function rejectRequest(id) {
+  try {
+    await apiCall('PUT', `/visit-requests/${id}/reject`);
+    showToast('Request rejected.', 'error');
+    await refreshData();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function cancelRequest(id) {
+  try {
+    await apiCall('PUT', `/visit-requests/${id}/cancel`);
+    showToast('Visit request cancelled.', 'info');
+    await refreshData();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+function viewPassFromRequest(req) {
+  if (typeof req === 'string') req = JSON.parse(req.replace(/&quot;/g, '"'));
+  const passId = req.qrCode || ('#' + req.id);
+
+  document.getElementById('passDetails').innerHTML = `
+    <div class="pass-row"><span class="pass-key">Visitor</span><span class="pass-val">${req.visitor?.name || '—'}</span></div>
+    <div class="pass-row"><span class="pass-key">Purpose</span><span class="pass-val">${req.purpose}</span></div>
+    <div class="pass-row"><span class="pass-key">Host</span><span class="pass-val">${req.host?.name || '—'}</span></div>
+    <div class="pass-row"><span class="pass-key">Date &amp; Time</span><span class="pass-val">${formatDT(req.visitDate)}</span></div>
+    <div class="pass-row"><span class="pass-key">Pass ID</span><span class="pass-val" style="font-family:var(--font-mono);color:var(--accent);">${passId}</span></div>`;
+
+  const qrContainer = document.getElementById('passQrCode');
+  qrContainer.innerHTML = '';
+  const qrText = `SENTINEL|${passId}|${req.visitor?.name||''}|${req.host?.name||''}|${formatDT(req.visitDate)}`;
+  const canvas = generateQRCanvas(qrText, 200);
+  qrContainer.appendChild(canvas);
+  openModal('passModal');
+}
+
+async function submitVisitRequest() {
+  const purpose  = document.getElementById('visitPurpose').value.trim();
+  const hostId   = document.getElementById('visitHost').value;
+  const datetime = document.getElementById('visitDateTime').value;
+
+  if (!purpose || !hostId || !datetime) { showToast('Please fill in all fields.', 'error'); return; }
+
+  try {
+    await apiCall('POST', '/visit-requests', {
+      purpose,
+      hostId: parseInt(hostId),
+      visitDate: new Date(datetime).toISOString(),
+    });
+    closeModal('requestModal');
+    document.getElementById('visitPurpose').value = '';
+    document.getElementById('visitHost').value = '';
+    document.getElementById('visitDateTime').value = '';
+    showToast('Visit request submitted!', 'success');
+    await refreshData();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// =============================================
+// CHECK-IN / CHECK-OUT (local state; real impl needs API)
+// =============================================
+function processCheckin(passId, fromCamera = false) {
+  const req = state.requests.find(r => (r.qrCode || ('#'+r.id)) === passId);
+  const resultEl = document.getElementById('scanResult');
+
+  if (!req) {
+    if (resultEl) {
+      resultEl.className = 'scan-result show fail';
+      resultEl.querySelector('.scan-result-icon').textContent = '✗';
+      resultEl.querySelector('.scan-result-text strong').textContent = 'Invalid Pass';
+      resultEl.querySelector('.scan-result-text span').textContent = 'No matching pass found in system';
+    }
+    showToast('Invalid pass ID. Access denied.', 'error');
+    return;
+  }
+  if (req.status !== 'APPROVED') {
+    if (resultEl) {
+      resultEl.className = 'scan-result show fail';
+      resultEl.querySelector('.scan-result-icon').textContent = '✗';
+      resultEl.querySelector('.scan-result-text strong').textContent = 'Pass Not Approved';
+      resultEl.querySelector('.scan-result-text span').textContent = `Status: ${req.status}`;
+    }
+    showToast('Pass not approved. Entry denied.', 'error');
+    return;
+  }
+  if (state.activePremise.find(v => v.passId === passId)) {
+    if (resultEl) {
+      resultEl.className = 'scan-result show fail';
+      resultEl.querySelector('.scan-result-icon').textContent = '⚠';
+      resultEl.querySelector('.scan-result-text strong').textContent = 'Already Checked In';
+      resultEl.querySelector('.scan-result-text span').textContent = `${req.visitor?.name} is already on premise`;
+    }
+    showToast(`${req.visitor?.name} is already checked in.`, 'error');
+    return;
+  }
+
+  state.activePremise.push({ name: req.visitor?.name || '?', passId, time: 'just now' });
+
+  if (resultEl) {
+    resultEl.className = 'scan-result show ok';
+    resultEl.querySelector('.scan-result-icon').textContent = '✓';
+    resultEl.querySelector('.scan-result-text strong').textContent = `Welcome, ${req.visitor?.name}`;
+    resultEl.querySelector('.scan-result-text span').textContent = `Purpose: ${req.purpose} · Host: ${req.host?.name}`;
+  }
+  showToast(`${req.visitor?.name} checked in successfully!`, 'success');
+
+  if (fromCamera) {
+    setTimeout(() => { stopCameraScanner(); renderContent(); }, 2500);
+  }
+}
+
+function manualCheckin() {
+  const passId = document.getElementById('manualPassId')?.value.trim().toUpperCase();
+  if (!passId) { showToast('Enter a pass ID', 'error'); return; }
+  processCheckin(passId, false);
+}
+
+function checkOut(passId) {
+  state.activePremise = state.activePremise.filter(v => v.passId !== passId);
+  renderContent();
+  showToast('Visitor checked out.', 'info');
+}
+
+// =============================================
+// CAMERA QR SCANNER
+// =============================================
+let _cameraStream = null;
+let _scanAnimId   = null;
+let _scanActive   = false;
+let _lastScannedCode = '';
+let _lastScannedTime = 0;
+
+function loadJsQR() {
+  return new Promise((resolve, reject) => {
+    if (window.jsQR) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+    s.onload  = resolve;
+    s.onerror = () => reject(new Error('Failed to load jsQR'));
+    document.head.appendChild(s);
+  });
+}
+
+async function startCameraScanner() {
+  const video    = document.getElementById('scanVideo');
+  const canvas   = document.getElementById('scanCanvas');
+  const icon     = document.getElementById('scanIcon');
+  const text     = document.getElementById('scanText');
+  const btnStart = document.getElementById('btnStartCam');
+  const btnStop  = document.getElementById('btnStopCam');
+  if (!video || !canvas) { showToast('Scanner not ready — try the Scan QR tab.', 'error'); return; }
+  try {
+    showToast('Requesting camera access…', 'info');
+    await loadJsQR();
+    _cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    video.srcObject = _cameraStream;
+    await video.play();
+    video.style.display = 'block';
+    if (icon) icon.style.display = 'none';
+    if (text) text.style.display = 'none';
+    if (btnStart) btnStart.style.display = 'none';
+    if (btnStop)  btnStop.style.display  = 'inline-flex';
+    _scanActive = true;
+    showToast('Camera started — point at a QR pass.', 'success');
+    tickScan(video, canvas);
+  } catch(err) {
+    let msg = 'Camera access denied.';
+    if (err.name === 'NotFoundError')    msg = 'No camera found on this device.';
+    if (err.name === 'NotAllowedError')  msg = 'Camera permission denied. Please allow access and retry.';
+    if (err.name === 'NotReadableError') msg = 'Camera is in use by another app.';
+    showToast(msg, 'error');
+    if (text) text.innerHTML = msg;
+  }
+}
+
+function stopCameraScanner() {
+  _scanActive = false;
+  if (_scanAnimId) { cancelAnimationFrame(_scanAnimId); _scanAnimId = null; }
+  if (_cameraStream) { _cameraStream.getTracks().forEach(t => t.stop()); _cameraStream = null; }
+  const video = document.getElementById('scanVideo');
+  const icon  = document.getElementById('scanIcon');
+  const text  = document.getElementById('scanText');
+  const bs    = document.getElementById('btnStartCam');
+  const bp    = document.getElementById('btnStopCam');
+  if (video) { video.srcObject = null; video.style.display = 'none'; }
+  if (icon)  { icon.style.display  = ''; }
+  if (text)  { text.style.display  = ''; text.innerHTML = 'Press <strong>Start Camera</strong> to begin scanning'; }
+  if (bs)    { bs.style.display    = ''; }
+  if (bp)    { bp.style.display    = 'none'; }
+}
+
+function tickScan(video, canvas) {
+  if (!_scanActive) return;
+  _scanAnimId = requestAnimationFrame(() => tickScan(video, canvas));
+  if (video.readyState < video.HAVE_ENOUGH_DATA) return;
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  if (!window.jsQR) return;
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+  if (code?.data) {
+    const now = Date.now();
+    if (code.data === _lastScannedCode && now - _lastScannedTime < 3000) return;
+    _lastScannedCode = code.data; _lastScannedTime = now;
+    let passId = code.data.startsWith('SENTINEL|') ? code.data.split('|')[1] : code.data.trim().toUpperCase();
+    processCheckin(passId, true);
+  }
+}
+
+// =============================================
+// QR CODE GENERATOR
+// =============================================
+function generateQRCanvas(text, size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const matrix = createQRMatrix(text);
+  if (!matrix) {
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,size,size);
+    ctx.fillStyle = '#000000'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('QR: ' + text.split('|')[1], size/2, size/2);
+    return canvas;
+  }
+  const n = matrix.length; const cellSize = size / n;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#000000';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++)
+    if (matrix[r][c]) ctx.fillRect(Math.floor(c*cellSize), Math.floor(r*cellSize), Math.ceil(cellSize), Math.ceil(cellSize));
+  return canvas;
+}
+
+function createQRMatrix(data) {
+  try {
+    const bytes = []; for (let i=0;i<data.length;i++) bytes.push(data.charCodeAt(i));
+    const version = data.length<=17?1:data.length<=32?2:3;
+    const size = 17+4*version;
+    const mat = Array.from({length:size},()=>new Array(size).fill(null));
+    const res = Array.from({length:size},()=>new Array(size).fill(false));
+    function addFinder(row,col) {
+      for(let r=0;r<7;r++) for(let c=0;c<7;c++){const dark=(r===0||r===6||c===0||c===6||(r>=2&&r<=4&&c>=2&&c<=4));mat[row+r][col+c]=dark;res[row+r][col+c]=true;}
+      for(let i=-1;i<=7;i++){if(row+i>=0&&row+i<size){if(col-1>=0){mat[row+i][col-1]=false;res[row+i][col-1]=true;}if(col+7<size){mat[row+i][col+7]=false;res[row+i][col+7]=true;}}if(col+i>=0&&col+i<size){if(row-1>=0){mat[row-1][col+i]=false;res[row-1][col+i]=true;}if(row+7<size){mat[row+7][col+i]=false;res[row+7][col+i]=true;}}}
+    }
+    addFinder(0,0);addFinder(0,size-7);addFinder(size-7,0);
+    for(let i=8;i<size-8;i++){mat[6][i]=(i%2===0);res[6][i]=true;mat[i][6]=(i%2===0);res[i][6]=true;}
+    mat[4*version+9][8]=true;res[4*version+9][8]=true;
+    for(let i=0;i<=8;i++){res[8][i]=true;res[i][8]=true;}res[8][size-8]=true;
+    for(let i=size-7;i<size;i++){res[8][i]=true;res[i][8]=true;}
+    if(version>=2){const ap=version===2?[6,18]:[6,22];for(const r of ap)for(const c of ap){if(res[r][c])continue;for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++){const dark=(Math.abs(dr)===2||Math.abs(dc)===2||dr===0&&dc===0);if(!res[r+dr][c+dc]){mat[r+dr][c+dc]=dark;res[r+dr][c+dc]=true;}}}}
+    const bits=[];const push=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>i)&1);};
+    push(0b0100,4);push(bytes.length,8);for(const b of bytes)push(b,8);push(0,4);while(bits.length%8)bits.push(0);
+    const padBytes=[0xEC,0x11];const totalData=version===1?16:version===2?28:44;let pi=0;
+    while(bits.length<totalData*8){push(padBytes[pi%2],8);pi++;}
+    const eccCount=version===1?10:version===2?16:22;for(let i=0;i<eccCount*8;i++)bits.push(0);
+    let bi=0;for(let col=size-1;col>=1;col-=2){if(col===6)col--;for(let vert=0;vert<size;vert++){const row=((col%4<2)?vert:size-1-vert);for(let dc=0;dc<2;dc++){const c=col-dc;if(!res[row][c]&&bi<bits.length){mat[row][c]=bits[bi++]===1;}}}}
+    for(let r=0;r<size;r++)for(let c=0;c<size;c++)if(mat[r][c]===null)mat[r][c]=false;
+    for(let r=0;r<size;r++)for(let c=0;c<size;c++)if(!res[r][c]&&(r+c)%2===0)mat[r][c]=!mat[r][c];
+    const fmt=[1,0,1,0,1,0,0,0,0,0,1,0,0,1,0];
+    const fmtPos1=[[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    const fmtPos2=[[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+    for(let i=0;i<15;i++){mat[fmtPos1[i][0]][fmtPos1[i][1]]=fmt[i]===1;mat[fmtPos2[i][0]][fmtPos2[i][1]]=fmt[i]===1;}
+    return mat;
+  } catch(e){return null;}
+}
+
+// =============================================
+// VISIT REQUEST MODAL — populate hosts from API
+// =============================================
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'requestModal') populateHostDropdown();
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('open'); });
+});
+
+async function populateHostDropdown() {
+  const select = document.getElementById('visitHost');
+  if (!select) return;
+  try {
+    // Use cached hosts or fetch
+    let hosts = state.hosts;
+    if (!hosts?.length) {
+      hosts = await apiCall('GET', '/users/hosts') || [];
+      state.hosts = hosts;
+    }
+    select.innerHTML = '<option value="">— Select a host —</option>' +
+      hosts.map(h => `<option value="${h.id}">${h.name}</option>`).join('');
+  } catch(e) {
+    select.innerHTML = '<option value="">No hosts available</option>';
+  }
+}
+
+// =============================================
+// UTILITY
+// =============================================
+function formatDT(dt) {
+  if (!dt) return '—';
+  try {
+    const d = new Date(dt);
+    return d.toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) + ', ' +
+           d.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+  } catch(e) { return dt; }
+}
+
+function setBtnLoading(id, loading) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.style.opacity = loading ? '0.6' : '';
+}
+
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  const icon = type==='success'?'✓':type==='error'?'✗':'ℹ';
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span>${icon}</span> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3800);
+}
+
+// Load staff table when staff tab is shown
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('nav-tab') && e.target.textContent.includes('Staff')) {
+    setTimeout(loadStaffTable, 100);
+  }
+});
+</script>
+</body>
+</html>
